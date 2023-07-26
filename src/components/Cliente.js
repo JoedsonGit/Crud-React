@@ -1,11 +1,12 @@
 import React from "react";
-import {Button, Table, Form, Row, Col} from "react-bootstrap";
+import {Button, Table, Form, Row, Col, Modal} from "react-bootstrap";
 import moment from 'moment';
 
 class Cliente extends React.Component{
-    
+
     constructor(props){
         super(props);
+
         this.state = {
             _id: 0,
             name:'',
@@ -15,12 +16,23 @@ class Cliente extends React.Component{
             status:'',
             telefone1:'',
             telefone2:'',
-            clientes : []
+            clientes : [],
+            modalAberta : false,
+            endereco : '',
+            bairro : '',
+            cep : '',
+            numero : '',
+            cidade_id : '',
+            cidades : []
         }
     }
+
+
+    
     // vai ser ativado quando montar o componete
     componentDidMount(){
         this.buscarCliente();
+        this.buscarCidade();
     }
     // vai ser ativado quando desmontar o componete
     componentWillUnmount(){
@@ -36,6 +48,17 @@ class Cliente extends React.Component{
             )
         
     }
+
+
+    buscarCidade = () =>{
+        fetch("http://localhost:8080/api/cidade")
+            .then(resposta => resposta.json())
+            .then(dados => {
+                this.setState({cidades : dados})
+            }
+            )
+        }
+
 
     deletarCliente = (id) => {
         fetch("http://localhost:8080/api/clientes/"+id,{method: 'DELETE'})
@@ -61,12 +84,19 @@ class Cliente extends React.Component{
                     rg_ie:      cliente.rg_ie,
                     status:     cliente.status,
                     telefone1:  cliente.telefone1,
-                    telefone2:  cliente.telefone2
-                    }
-                )
-        }
-        )
-    }
+                    telefone2:  cliente.telefone2,
+
+                    endereco :  cliente.endereco,
+                    bairro :    cliente.bairro,
+                    cep :       cliente.cep,
+                    numero:     cliente.numero,
+                    cidade_id : cliente.cidade_id
+
+
+                    })
+                    this.abrirModal();
+                })
+            }
 
     cadastraCliente = (cliente) => {
         fetch("http://localhost:8080/api/clientes/",
@@ -79,7 +109,7 @@ class Cliente extends React.Component{
             if(resposta.ok){
                 this.buscarCliente();
             }else{
-                alert('Não foi possivel cadastrar o aluno !');
+                alert('Não foi possivel cadastrar o cliente !');
             }
             
         }
@@ -98,7 +128,7 @@ class Cliente extends React.Component{
             if(resposta.ok){
                 this.buscarCliente();
             }else{
-                alert('Não foi possivel atualizar o aluno !');
+                alert('Não foi possivel atualizar o cliente !');
             }
             
         }
@@ -123,8 +153,8 @@ class Cliente extends React.Component{
                         <th>Opções</th>
                     </tr>
                 </thead>
+
                 <tbody>
-  
                 {
                     this.state.clientes.map((cliente) =>
                         <tr>
@@ -145,6 +175,7 @@ class Cliente extends React.Component{
                     )
                 }
                 </tbody>
+
             </Table>
         )
     }
@@ -189,6 +220,15 @@ class Cliente extends React.Component{
             }
         )
     }
+
+
+    atualizaCidade = (e) => {
+        this.setState(
+            {
+                cidade_id: e.target.value
+            }
+        )
+    }    
     
     atualizaTelefone1 = (e) => {
         this.setState(
@@ -206,6 +246,42 @@ class Cliente extends React.Component{
         )
     }    
 
+
+    atualizaEndereco = (e) => {
+        this.setState(
+            {
+                endereco: e.target.value
+            }
+        )
+    } 
+
+    atualizaBairro = (e) => {
+        this.setState(
+            {
+                bairro: e.target.value
+            }
+        )
+    } 
+    
+    atualizaNumero = (e) => {
+        this.setState(
+            {
+                numero: e.target.value
+            }
+        )
+    }     
+
+
+    atualizaCep = (e) => {
+        this.setState(
+            {
+                cep: e.target.value
+            }
+        )
+    }     
+
+
+
     submit(){
         if(this.state._id == 0){
             const cliente = {
@@ -215,10 +291,20 @@ class Cliente extends React.Component{
                 rg_ie:      this.state.rg_ie,
                 status:     this.state.status,
                 telefone1:  this.state.telefone1,
-                telefone2:  this.state.telefone2
+                telefone2:  this.state.telefone2,
+
+                endereco :  this.state.endereco,
+                bairro :    this.state.bairro,
+                cep :       this.state.cep,
+                numero:     this.state.numero,
+                cidade_id : this.state.cidade_id
+
+
+
                }
                this.cadastraCliente(cliente);
         }else{
+
        const cliente = {
         _id:        this.state._id,
         name:       this.state.name,
@@ -227,11 +313,21 @@ class Cliente extends React.Component{
         rg_ie:      this.state.rg_ie,
         status:     this.state.status,
         telefone1:  this.state.telefone1,
-        telefone2:  this.state.telefone2
+        telefone2:  this.state.telefone2,
+
+        endereco :  this.state.endereco,
+        bairro :    this.state.bairro,
+        cep :       this.state.cep,
+        numero:     this.state.numero,
+        cidade_id : this.state.cidade_id
+
+
+
        }
        this.atualizarCliente(cliente);
         }
 
+        this.fecharModal();
     }
 
     reset = () => {
@@ -244,15 +340,44 @@ class Cliente extends React.Component{
             rg_ie:'',
             status:'',
             telefone1:'',
-            telefone2:''            
+            telefone2:'',  
+            
+            endereco:'',
+            bairro:'',
+            cep:'',
+            numero:'',
+            cidade_id:'',
+
             }
         )
+        this.abrirModal();
     }
+
+
+    fecharModal = () => {
+        this.setState({
+            modalAberta : false
+        })
+    }
+
+
+    abrirModal = () => {
+        this.setState({
+            modalAberta : true
+        })
+    }
+
+
 
 
 render(){
     return(
         <div>
+                <Modal size="xl" show={this.state.modalAberta} onHide={this.fecharModal}>
+                <Modal.Header closeButton>
+                <Modal.Title>Cliente</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
                 <Form>
                         <Row className="mb-3">
                             <Form.Group as={Col} controlId="formGridId">
@@ -309,11 +434,56 @@ render(){
                             </Form.Group>   
 
                         </Row>
-                        <Button variant="primary" type="submit" onClick={() => this.submit()}>Salvar</Button>                         
-                        <Button variant="success" type="submit" onClick={() => this.reset()}>Novo</Button>                         
-                    </Form>     
-                    
 
+                        <Row className="mb-3">
+
+                            <Form.Group as={Col} controlId="formGridTelefone1">
+                            <Form.Label>Endereço</Form.Label>
+                            <Form.Control type="text" placeholder="Endereço" value={this.state.endereco} onChange={this.atualizaEndereco}/>
+                            </Form.Group>
+
+                            <Form.Group as={Col} controlId="formGridTelefone2">
+                            <Form.Label>Bairro</Form.Label>
+                            <Form.Control type="text" placeholder="Bairro" value={this.state.bairro} onChange={this.atualizaBairro}/>
+                            </Form.Group>   
+ 
+                            </Row>
+
+                            <Row className="mb-3">
+
+                            <Form.Group as={Col} controlId="formGridTelefone2">
+                            <Form.Label>Numero</Form.Label>
+                            <Form.Control type="text" placeholder="Numero" value={this.state.numero} onChange={this.atualizaNumero}/>
+                            </Form.Group>   
+
+                            <Form.Group as={Col} controlId="formGridTelefone2">
+                            <Form.Label>Cep</Form.Label>
+                            <Form.Control type="text" placeholder="Cep" value={this.state.cep} onChange={this.atualizaCep}/>
+                            </Form.Group>  
+
+                            <Form.Group as={Col} controlId="formGridTipoPessoa">
+                            <Form.Label>Cidade</Form.Label>
+                            <Form.Select aria-label="Default select example" value={this.state.cidade_id} onChange={this.atualizaCidade}>
+                                    {
+                                    this.state.cidades.map((cidade) =>
+                                    <option value={cidade.id}>{cidade.nome}</option>
+                                    )}
+                            </Form.Select>
+                            </Form.Group>  
+                            </Row>
+                    </Form>    
+                </Modal.Body>
+                <Modal.Footer>
+                <Button variant="secondary" onClick={this.fecharModal}>
+                    Fechar
+                </Button>
+                
+                <Button variant="primary" type="submit" onClick={() => this.submit()}>Salvar</Button>                         
+                
+                </Modal.Footer>
+                </Modal>
+                    
+                <Button variant="success" onClick={() => this.reset()}>Novo</Button> 
             {this.renderTabela()}
         </div>
         
